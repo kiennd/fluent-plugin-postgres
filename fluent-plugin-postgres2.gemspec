@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.email         = ['team@uken.com']
   s.description   = %q{fluent plugin to insert on PostgreSQL}
   s.summary       = %q{fluent plugin to insert on PostgreSQL}
-  s.homepage      = 'https://github.com/uken/fluent-plugin-postgres'
+  s.homepage      = 'https://github.com/uken/fluent-plugin-postgres2'
   s.license       = 'Apache-2.0'
 
   s.files         = `git ls-files`.split($\)
