@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 Gem::Specification.new do |s|
-  s.name          = 'fluent-plugin-postgres2'
+  s.name          = 'fluent-plugin-postgres'
   s.version       = '0.1.0'
   s.authors       = ['TAGOMORI Satoshi', 'Diogo Terror', 'pitr']
   s.email         = ['team@uken.com']

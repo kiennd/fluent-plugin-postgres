@@ -2,8 +2,8 @@ require 'fluent/plugin/output'
 require 'pg'
 require 'logger'
 
-class Fluent::Plugin::Postgres2Output < Fluent::Plugin::Output
-  Fluent::Plugin.register_output('postgres2', self)
+class Fluent::Plugin::PostgresOutput < Fluent::Plugin::Output
+  Fluent::Plugin.register_output('postgres', self)
 
   helpers :inject, :compat_parameters
 

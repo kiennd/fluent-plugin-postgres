@@ -2,7 +2,7 @@ require 'helper'
 require 'pg'
 require 'logger'
 
-class Postgres2OutputTest < Test::Unit::TestCase
+class PostgresOutputTest < Test::Unit::TestCase
   def setup
     Fluent::Test.setup
   end
@@ -25,7 +25,7 @@ class Postgres2OutputTest < Test::Unit::TestCase
   ]
 
   def create_driver(conf=CONFIG)
-    d = Fluent::Test::Driver::Output.new(Fluent::Plugin::Postgres2Output).configure(conf)
+    d = Fluent::Test::Driver::Output.new(Fluent::Plugin::PostgresOutput).configure(conf)
     d.instance.instance_eval {
       def client
         obj = Object.new
