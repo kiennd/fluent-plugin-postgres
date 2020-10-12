@@ -1,5 +1,6 @@
 require 'fluent/plugin/output'
 require 'pg'
+require 'logger'
 
 class Fluent::Plugin::PostgresOutput < Fluent::Plugin::Output
   Fluent::Plugin.register_output('postgres', self)
@@ -16,13 +17,17 @@ class Fluent::Plugin::PostgresOutput < Fluent::Plugin::Output
   config_param :sql, :string, :default => nil
   config_param :table, :string, :default => nil
   config_param :columns, :string, :default => nil
-
+  config_param :json_fields, :string, :default => nil
   config_param :format, :string, :default => "raw" # or json
 
   attr_accessor :handler
 
+
+
+  $logger = Logger.new(STDOUT)
   # We don't currently support mysql's analogous json format
   def configure(conf)
+    $logger.info("-----------------------------------configure------------------------------");
     compat_parameters_convert(conf, :inject)
     super
 
@@ -30,7 +35,16 @@ class Fluent::Plugin::PostgresOutput < Fluent::Plugin::Output
       @format_proc = Proc.new{|tag, time, record| record.to_json}
     else
       @key_names = @key_names.split(/\s*,\s*/)
-      @format_proc = Proc.new{|tag, time, record| @key_names.map{|k| record[k]}}
+      if !@json_fields.nil? 
+        @json_fields = @json_fields.split(/\s*,\s*/)
+      end
+      @format_proc = Proc.new{|tag, time, record| @key_names.map{ |k|
+        if !@json_fields.nil? && (@json_fields.include? k)
+          record[k].to_json
+        else
+          record[k]
+        end
+      }}
     end
 
     if @columns.nil? and @sql.nil?
@@ -50,6 +64,7 @@ class Fluent::Plugin::PostgresOutput < Fluent::Plugin::Output
   end
 
   def format(tag, time, record)
+    $logger.info("-----------------------------------format------------------------------");
     record = inject_values_to_record(tag, time, record)
     [tag, time, @format_proc.call(tag, time, record)].to_msgpack
   end
@@ -62,7 +77,8 @@ class Fluent::Plugin::PostgresOutput < Fluent::Plugin::Output
     true
   end
 
-  def client
+  def client2
+    $logger.info("-----------------------------------client2------------------------------");
     PG::Connection.new({
       :host => @host, :port => @port,
       :user => @username, :password => @password,
@@ -71,10 +87,14 @@ class Fluent::Plugin::PostgresOutput < Fluent::Plugin::Output
   end
 
   def write(chunk)
-    handler = self.client
+    $logger.info("-----------------------------------write------------------------------")
+    handler = self.client2()
     handler.prepare("write", @sql)
     chunk.msgpack_each { |tag, time, data|
-      handler.exec_prepared("write", data)
+      $logger.info(@sql)
+      $logger.info(data)
+      a = handler.exec_prepared("write", data)
+      $logger.info(a)
     }
     handler.close
   end
