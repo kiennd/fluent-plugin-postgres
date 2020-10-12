@@ -1,12 +1,12 @@
 # -*- encoding: utf-8 -*-
 Gem::Specification.new do |s|
-  s.name          = 'fluent-plugin-postgres'
+  s.name          = 'fluent-plugin-postgres2'
   s.version       = '0.1.0'
   s.authors       = ['TAGOMORI Satoshi', 'Diogo Terror', 'pitr']
   s.email         = ['team@uken.com']
   s.description   = %q{fluent plugin to insert on PostgreSQL}
   s.summary       = %q{fluent plugin to insert on PostgreSQL}
-  s.homepage      = 'https://github.com/uken/fluent-plugin-postgres'
+  s.homepage      = 'https://github.com/uken/fluent-plugin-postgres2'
   s.license       = 'Apache-2.0'
 
   s.files         = `git ls-files`.split($\)
