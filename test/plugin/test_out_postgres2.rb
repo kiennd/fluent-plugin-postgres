@@ -1,7 +1,7 @@
 require 'helper'
 require 'pg'
 
-class PostgresOutputTest < Test::Unit::TestCase
+class Postgres2OutputTest < Test::Unit::TestCase
   def setup
     Fluent::Test.setup
   end
@@ -16,7 +16,7 @@ sql INSERT INTO baz (col1,col2,col3,col4) VALUES (?,?,?,?)
   ]
 
   def create_driver(conf=CONFIG)
-    d = Fluent::Test::Driver::Output.new(Fluent::Plugin::PostgresOutput).configure(conf)
+    d = Fluent::Test::Driver::Output.new(Fluent::Plugin::Postgres2Output).configure(conf)
     d.instance.instance_eval {
       def client
         obj = Object.new
