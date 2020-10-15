@@ -7,7 +7,7 @@ class PostgresOutputTest < Test::Unit::TestCase
     Fluent::Test.setup
   end
   $logger = Logger.new(STDOUT)
-
+  
   CONFIG = %[
     host 172.16.24.224
     database postgres
@@ -42,7 +42,7 @@ class PostgresOutputTest < Test::Unit::TestCase
 
   def test_time_and_tag_key_complex
     d = create_driver %[
-      host 172.16.24.224
+      host 172.16.24.28
       database postgres
       username postgres
       password 1
@@ -54,7 +54,8 @@ class PostgresOutputTest < Test::Unit::TestCase
       tag_key tagkey
       json_fields field1,field2
       key_names timekey,tagkey,field1,field2
-      sql INSERT INTO baz (coltime,coltag,col1,col2) VALUES ($1,$2,$3,$4)
+      hash_input_fields_index 1,3
+      sql INSERT INTO baz (coltime,coltag,col1,col2,md5) VALUES ($1,$2,$3,$4,$5)
     ]
 
     time = event_time('2012-12-17 09:23:45 +0900')
