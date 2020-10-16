@@ -37,6 +37,10 @@ class Fluent::Plugin::PostgresOutput < Fluent::Plugin::Output
     if @format == 'json'
       @format_proc = Proc.new{|tag, time, record| record.to_json}
     else
+      if !@hash_input_fields_index.nil? 
+        @hash_input_fields_index = @hash_input_fields_index.split(/\s*,\s*/)
+      end
+
       @key_names = @key_names.split(/\s*,\s*/)
       if !@json_fields.nil? 
         @json_fields = @json_fields.split(/\s*,\s*/)
@@ -90,17 +94,16 @@ class Fluent::Plugin::PostgresOutput < Fluent::Plugin::Output
   end
 
   def write(chunk)
-    $logger.info('-----------------------------------write-------------------------------------')
-    $logger.info(@hash_input_fields_index);
+    #$logger.info('-----------------------------------write-------------------------------------')
+    #$logger.info(@hash_input_fields_index);
 
     handler = self.client2()
     handler.prepare("write", @sql)
     chunk.msgpack_each { |tag, time, data|
       if !@hash_input_fields_index.nil?
-        @hash_input_fields_index = @hash_input_fields_index.split(/\s*,\s*/)
         hashInput = ''
         @hash_input_fields_index.each { |item|
-          $logger.info(data[item.to_i])
+          #$logger.info(data[item.to_i])
           hashInput = hashInput + data[item.to_i]
         }
         md5 = Digest::MD5.new 
