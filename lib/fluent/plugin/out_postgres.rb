@@ -116,5 +116,6 @@ class Fluent::Plugin::PostgresOutput < Fluent::Plugin::Output
       handler.close
     rescue PG::UniqueViolation => uniqE
        $logger.info('-----------------------------------UniqueViolation-------------------------------------')
+    end
   end
 end
