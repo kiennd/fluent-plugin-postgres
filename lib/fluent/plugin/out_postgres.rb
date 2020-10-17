@@ -3,7 +3,6 @@ require 'pg'
 require 'logger'
 require 'digest'
 
-
 class Fluent::Plugin::PostgresOutput < Fluent::Plugin::Output
   Fluent::Plugin.register_output('postgres', self)
 
@@ -94,25 +93,28 @@ class Fluent::Plugin::PostgresOutput < Fluent::Plugin::Output
   end
 
   def write(chunk)
-    #$logger.info('-----------------------------------write-------------------------------------')
-    #$logger.info(@hash_input_fields_index);
+    begin
+      #$logger.info('-----------------------------------write-------------------------------------')
+      #$logger.info(@hash_input_fields_index);
 
-    handler = self.client2()
-    handler.prepare("write", @sql)
-    chunk.msgpack_each { |tag, time, data|
-      if !@hash_input_fields_index.nil?
-        hashInput = ''
-        @hash_input_fields_index.each { |item|
-          #$logger.info(data[item.to_i])
-          hashInput = hashInput + data[item.to_i]
-        }
-        md5 = Digest::MD5.new 
-        md5.reset
-        md5 << hashInput
-        data.append(md5.hexdigest)
-      end
-      handler.exec_prepared("write", data)
-    }
-    handler.close
+      handler = self.client2()
+      handler.prepare("write", @sql)
+      chunk.msgpack_each { |tag, time, data|
+        if !@hash_input_fields_index.nil?
+          hashInput = ''
+          @hash_input_fields_index.each { |item|
+            #$logger.info(data[item.to_i])
+            hashInput = hashInput + data[item.to_i]
+          }
+          md5 = Digest::MD5.new 
+          md5.reset
+          md5 << hashInput
+          data.append(md5.hexdigest)
+        end
+        handler.exec_prepared("write", data)
+      }
+      handler.close
+    rescue PG::UniqueViolation => uniqE
+       $logger.info('-----------------------------------UniqueViolation-------------------------------------')
   end
 end
