@@ -21,6 +21,8 @@ class Fluent::Plugin::PostgresOutput < Fluent::Plugin::Output
   config_param :json_fields, :string, :default => nil
   config_param :format, :string, :default => "raw" # or json
   config_param :hash_input_fields_index, :string, :default => nil
+  config_param :update_key_index, :string, :default => nil
+  config_param :update, :string, :default => nil
   
   attr_accessor :handler
 
@@ -93,29 +95,41 @@ class Fluent::Plugin::PostgresOutput < Fluent::Plugin::Output
   end
 
   def write(chunk)
-    begin
-      #$logger.info('-----------------------------------write-------------------------------------')
-      #$logger.info(@hash_input_fields_index);
+    #$logger.info('-----------------------------------write-------------------------------------')
+    #$logger.info(@hash_input_fields_index);
 
-      handler = self.client2()
-      handler.prepare("write", @sql)
-      chunk.msgpack_each { |tag, time, data|
-        if !@hash_input_fields_index.nil?
-          hashInput = ''
-          @hash_input_fields_index.each { |item|
-            #$logger.info(data[item.to_i])
-            hashInput = hashInput + data[item.to_i]
-          }
-          md5 = Digest::MD5.new 
-          md5.reset
-          md5 << hashInput
-          data.append(md5.hexdigest)
-        end
-        handler.exec_prepared("write", data)
-      }
-      handler.close
-    rescue PG::UniqueViolation => uniqE
-       $logger.info('-----------------------------------UniqueViolation-------------------------------------')
+    handler = self.client2()
+    handler.prepare("write", @sql)
+    if !@update_key_index.nil?
+      handler.prepare("update", @update)
     end
+    chunk.msgpack_each { |tag, time, data|
+      if !@hash_input_fields_index.nil?
+        hashInput = ''
+        @hash_input_fields_index.each { |item|
+          #$logger.info(data[item.to_i])
+          hashInput = hashInput + data[item.to_i]
+        }
+        md5 = Digest::MD5.new 
+        md5.reset
+        md5 << hashInput
+        data.append(md5.hexdigest)
+      end
+      begin
+        handler.exec_prepared("write", data)
+      rescue PG::UniqueViolation => uniqE
+        $logger.info('-----------------------------------UniqueViolation-------------------------------------')
+        begin
+          $logger.info('-----------------------------------Update-------------------------------------')
+          if !@update_key_index.nil?
+            data.append(data[update_key_index.to_i])
+          end
+          handler.exec_prepared("update", data)
+        rescue => e
+          $logger.info('-----------------------------------Update Error-------------------------------------')
+        end
+      end
+    }
+    handler.close
   end
 end
